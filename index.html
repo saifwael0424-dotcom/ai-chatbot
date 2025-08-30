@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ضروري للموبايل -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Chatbot</title>
   <style>
     body {
@@ -75,10 +75,30 @@
       font-size: 16px;
     }
 
-    /* 📱 تعديل مهم للموبايل */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .suggestion-btn {
+      background: #eee;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .suggestion-btn:hover {
+      background: #ddd;
+    }
+
     @media (max-width: 480px) {
       body {
-        height: 100dvh; /* يتكيف مع الشاشات الجديدة */
+        height: 100dvh;
         align-items: stretch;
       }
 
@@ -93,10 +113,6 @@
         padding: 10px;
       }
 
-      .input-box {
-        flex-direction: row;
-      }
-
       .input-box input,
       .input-box button {
         font-size: 14px;
@@ -105,12 +121,23 @@
       .message {
         font-size: 14px;
       }
+
+      .suggestion-btn {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="chat-container">
-    <div id="chatBox" class="chat-box"></div>
+    <div id="chatBox" class="chat-box">
+      <div class="suggestions" id="suggestions">
+        <button class="suggestion-btn" onclick="sendSuggestedMessage('أماكن تواجد المستر')">أماكن تواجد المستر</button>
+        <button class="suggestion-btn" onclick="sendSuggestedMessage('سعر الكتب')">سعر الكتب</button>
+        <button class="suggestion-btn" onclick="sendSuggestedMessage('مواعيد الحصص')">مواعيد الحصص</button>
+      </div>
+    </div>
     <div class="input-box">
       <input type="text" id="userInput" placeholder="اكتب رسالتك...">
       <button onclick="sendMessage()">إرسال</button>
@@ -118,14 +145,18 @@
   </div>
 
   <script>
-    async function sendMessage() {
+    async function sendMessage(customMessage = null) {
       const input = document.getElementById("userInput");
       const chatBox = document.getElementById("chatBox");
-      const message = input.value.trim();
+      const message = customMessage || input.value.trim();
 
       if (!message) return;
 
-      // عرض رسالة اليوزر
+      // إخفاء الاقتراحات بعد أول رسالة
+      const suggestions = document.getElementById("suggestions");
+      if (suggestions) suggestions.style.display = "none";
+
+      // عرض رسالة المستخدم
       const userMsg = document.createElement("div");
       userMsg.classList.add("message", "user-message");
       userMsg.innerText = message;
@@ -142,12 +173,11 @@
 
         const data = await response.json();
 
-        // الرد من البوت
+        // عرض رد البوت
         const botMsg = document.createElement("div");
         botMsg.classList.add("message", "bot-message");
         botMsg.innerText = data.output || "❌ لم يتم الحصول على رد";
         chatBox.appendChild(botMsg);
-
         chatBox.scrollTop = chatBox.scrollHeight;
       } catch (error) {
         console.error(error);
@@ -156,6 +186,10 @@
         errMsg.innerText = "⚠️ حدث خطأ في الاتصال";
         chatBox.appendChild(errMsg);
       }
+    }
+
+    function sendSuggestedMessage(text) {
+      sendMessage(text);
     }
   </script>
 </body>
